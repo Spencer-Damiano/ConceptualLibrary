@@ -1,7 +1,7 @@
 
-# .\DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "frontend" "frontend_snapshot"
-# .\DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "backend" "backend_snapshot"
-# .\DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "." "full_codebase"
+# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "frontend" "frontend_snapshot"
+# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "backend" "backend_snapshot"
+# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "." "full_codebase"
 
 # PowerShell script to get a snapshot (get_snapshot.ps1)
 param (
@@ -31,7 +31,7 @@ $rootDir = Find-RootDirectory $RepoPath
 
 # Define paths
 $folderPath = (Resolve-Path "$rootDir\$FolderName").Path
-$outputDir = "$rootDir\DEVOPS\SCRIPTS\snapshot"
+$outputDir = "$rootDir\_DEVOPS\SCRIPTS\snapshot"
 
 # Ensure the output directory exists
 if (-not (Test-Path $outputDir)) {

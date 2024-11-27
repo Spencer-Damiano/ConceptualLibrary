@@ -401,4 +401,7 @@ FodyWeavers.xsd
 backend/.venv/
 
 # DEVOPS
-DEVOPS/SCRIPTS/snapshot/
+_DEVOPS/SCRIPTS/snapshot/
+
+# Root
+.env
