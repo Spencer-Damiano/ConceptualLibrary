@@ -9,7 +9,7 @@ from seeds.seed_users import create_sample_users
 from seeds.seed_tags import create_sample_tags
 from seeds.seed_sessions import create_sample_sessions
 from seeds.seed_tasks import create_sample_tasks
-from seeds.seed_task_tags import create_sample_task_tags
+from seeds.seed_taskTags import create_sample_task_tags
 
 def clear_database():
     """Clear all collections from the database"""
