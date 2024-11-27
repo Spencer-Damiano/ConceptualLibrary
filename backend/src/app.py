@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://mongodb:27017/conceptual_library")
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 CORS(app)
 mongo = PyMongo(app)
 
