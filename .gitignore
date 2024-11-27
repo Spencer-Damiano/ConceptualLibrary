@@ -402,6 +402,9 @@ backend/.venv/
 
 # DEVOPS
 _DEVOPS/SCRIPTS/snapshot/
+_DEVOPS/notes.md
 
 # Root
 .env
+_DEVOPS/notes.md
+_DEVOPS/notes.md

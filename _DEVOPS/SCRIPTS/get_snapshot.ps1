@@ -1,9 +1,8 @@
-
-# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "frontend" "frontend_snapshot"
-# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "backend" "backend_snapshot"
-# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\GitStorage\ConceptualLibrary" "." "full_codebase"
-
 # PowerShell script to get a snapshot (get_snapshot.ps1)
+
+# to run the script, use the following command:
+# .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "[LOCAL_PATH_TO_REPO]" "[DIR]" "[NAME]_snapshot"
+# Example: # .\_DEVOPS\SCRIPTS\get_snapshot.ps1 "C:\files\repo" "frontend" "frontend_snapshot"
 param (
     [Parameter(Mandatory=$true)]
     [string]$RepoPath,
