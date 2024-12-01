@@ -11,23 +11,13 @@ from seeds.seed_sessions import create_sample_sessions
 from seeds.seed_tasks import create_sample_tasks
 from seeds.seed_taskTags import create_sample_task_tags
 
-def clear_database():
-    """Clear all collections from the database"""
-    load_dotenv()
-    
-    MONGO_HOST = os.getenv('MONGO_HOST', 'localhost')
-    MONGO_PORT = os.getenv('MONGO_PORT', '27017')
-    MONGO_DB = os.getenv('MONGO_DB', 'productivity_app')
-    
-    client = MongoClient(f"mongodb://{MONGO_HOST}:{MONGO_PORT}")
-    db = client[MONGO_DB]
-    
-    collections = ['users', 'sessions', 'timerTypes', 'tasks', 'tags', 'taskTags', 'auditLogs']
-    
-    for collection in collections:
-        if collection in db.list_collection_names():
-            db[collection].delete_many({})
-            print(f"Cleared collection: {collection}")
+def check_if_seeded(db):
+    """Check if database already has data"""
+    return (
+        db.users.count_documents({}) > 0 and
+        db.tags.count_documents({}) > 0 and
+        db.tasks.count_documents({}) > 0
+    )
 
 def seed_database(clear_first=False):
     """
@@ -41,9 +31,28 @@ def seed_database(clear_first=False):
     try:
         print("=== Starting Database Seeding Process ===")
         
+        # Connect to MongoDB
+        load_dotenv()
+        MONGO_HOST = os.getenv('MONGO_HOST', 'localhost')
+        MONGO_PORT = os.getenv('MONGO_PORT', '27017')
+        MONGO_DB = os.getenv('MONGO_DB', 'productivity_app')
+        
+        client = MongoClient(f"mongodb://{MONGO_HOST}:{MONGO_PORT}")
+        db = client[MONGO_DB]
+        
+        # Check if database is already seeded
+        if check_if_seeded(db) and not clear_first:
+            print("\nDatabase already contains data. Skipping seeding.")
+            print("Use --clear flag to reset and reseed the database.")
+            return
+        
         if clear_first:
             print("\n--- Clearing existing data ---")
-            clear_database()
+            collections = ['users', 'sessions', 'timerTypes', 'tasks', 'tags', 'taskTags', 'auditLogs']
+            for collection in collections:
+                if collection in db.list_collection_names():
+                    db[collection].delete_many({})
+                    print(f"Cleared collection: {collection}")
         
         print("\n--- Creating Users ---")
         user_ids = create_sample_users()

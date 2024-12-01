@@ -14,6 +14,8 @@ services:
       - .env
     depends_on:
       - backend
+    networks:
+      - app-network
 
   backend:
     build:
@@ -23,10 +25,28 @@ services:
       - "${FLASK_PORT}:${FLASK_PORT}"
     volumes:
       - ./backend:/app
+      - ./database:/database
     env_file:
       - .env
+    environment:
+      - MONGO_HOST=mongodb
+      - PYTHONUNBUFFERED=1
+      - INIT_DB=${INIT_DB:-false}  # New environment variable to control initialization
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+    command: >
+      bash -c "
+        if [ \"$$INIT_DB\" = \"true\" ]; then
+          echo 'Initializing database...' &&
+          cd /database &&
+          python init.py &&
+          python -m seeds.seed_all || true
+        fi &&
+        cd /app &&
+        python src/app.py"
 
   mongodb:
     image: mongo:latest
@@ -36,6 +56,15 @@ services:
       - mongodb_data:/data/db
     env_file:
       - .env
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   nginx:
     image: nginx:alpine
@@ -48,6 +77,13 @@ services:
     depends_on:
       - frontend
       - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   mongodb_data:
+    name: mongodb_data
