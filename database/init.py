@@ -10,10 +10,10 @@ def init_database():
     # Get MongoDB connection details from environment variables
     MONGO_HOST = os.getenv('MONGO_HOST', 'localhost')
     MONGO_PORT = os.getenv('MONGO_PORT', '27017')
-    MONGO_DB = os.getenv('MONGO_DB', 'conceptual_local')
+    MONGO_DB = os.getenv('MONGO_DB', 'conceptual_library')
     
     # Simple connection URI for local MongoDB without auth
-    MONGO_URI = f"mongodb://{MONGO_HOST}:{MONGO_PORT}"
+    MONGO_URI = os.getenv('MONGO_URI', 'conceptual_library')
     
     try:
         # Connect to MongoDB

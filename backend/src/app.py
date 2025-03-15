@@ -37,12 +37,15 @@ def create_app():
     
     # Configuration
     app.config["MONGO_URI"] = os.getenv("MONGO_URI")
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-this")
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
     
     # Initialize CORS and extensions
     CORS(app)
     mongo.init_app(app)
     jwt.init_app(app)
+    
+    # Add this line to attach mongo to app
+    app.mongo = mongo
     
     # Import namespaces
     from routes.auth import auth_bp, auth_ns

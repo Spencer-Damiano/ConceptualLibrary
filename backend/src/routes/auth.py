@@ -13,7 +13,8 @@ auth_ns = Namespace('auth', description='Authentication operations')
 register_model = auth_ns.model('Register', {
     'email': fields.String(required=True, description='User email'),
     'password': fields.String(required=True, description='User password'),
-    'name': fields.String(description='User name')
+    'name': fields.String(description='User name'),
+    'username': fields.String(required=True, description='Username')
 })
 
 login_model = auth_ns.model('Login', {
@@ -26,17 +27,27 @@ login_model = auth_ns.model('Login', {
 def register():
     data = request.get_json()
     
-    if not data or not data.get('email') or not data.get('password'):
+    if not data or not data.get('email') or not data.get('password') or not data.get('username'):
         return jsonify({'message': 'Missing required fields'}), 400
     
     if current_app.mongo.db.users.find_one({'email': data['email']}):
         return jsonify({'message': 'Email already registered'}), 409
     
+    if current_app.mongo.db.users.find_one({'username': data['username']}):
+        return jsonify({'message': 'Username already taken'}), 409
+    
+    now = datetime.utcnow()
     user = {
         'email': data['email'],
         'password': generate_password_hash(data['password']),
         'name': data.get('name', ''),
-        'created_at': datetime.utcnow()
+        'username': data['username'],
+        'userType': 'user',
+        'isActive': True,
+        'createdAt': now,
+        'updatedAt': now,
+        'lastLoginAt': now,
+        'version': 1
     }
     
     current_app.mongo.db.users.insert_one(user)
@@ -53,6 +64,18 @@ def login():
     
     if not user or not check_password_hash(user['password'], data['password']):
         return jsonify({'message': 'Invalid credentials'}), 401
+    
+    # Update last login time
+    current_app.mongo.db.users.update_one(
+        {'_id': user['_id']},
+        {
+            '$set': {
+                'lastLoginAt': datetime.utcnow(),
+                'updatedAt': datetime.utcnow(),
+                'version': user['version'] + 1
+            }
+        }
+    )
     
     access_token = create_access_token(identity=str(user['_id']))
     return jsonify({'access_token': access_token}), 200

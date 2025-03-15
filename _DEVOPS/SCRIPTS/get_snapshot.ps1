@@ -46,7 +46,7 @@ $FileExtensions = @(
     "js", "py", "sh", "vue", "ts", "tsx", "scss", 
     "html", "css", "json", "md", "yml", "yaml", "txt",
     "gitignore", "env", "config", "sql",
-    "jsx", "ini", "toml", "xml"
+    "jsx", "ini", "toml", "xml", "ipynb", 'parquet', "conf"
 )
 
 # Files and folders to ignore

@@ -52,16 +52,21 @@ class CurrentUser(Resource):
             if not user:
                 users_ns.abort(404, 'User not found')
             
-            # Remove password from response and transform fields
-            user.pop('password', None)
-            user['_id'] = str(user['_id'])
-            user['user_type'] = user.pop('userType')
-            user['is_active'] = user.pop('isActive')
-            user['created_at'] = user.pop('createdAt')
-            user['updated_at'] = user.pop('updatedAt')
-            user['last_login_at'] = user.pop('lastLoginAt')
+            # Transform the document to match the response model
+            transformed_user = {
+                '_id': str(user['_id']),
+                'email': user['email'],
+                'username': user['username'],
+                'name': user['name'],
+                'user_type': user['userType'],
+                'is_active': user['isActive'],
+                'created_at': user['createdAt'],
+                'updated_at': user['updatedAt'],
+                'last_login_at': user['lastLoginAt'],
+                'version': user['version']
+            }
             
-            return user
+            return transformed_user
             
         except Exception as e:
             users_ns.abort(500, str(e))
@@ -97,11 +102,10 @@ class UserProfile(Resource):
             }
             
             # Add metadata updates
+            current_user = current_app.mongo.db.users.find_one({'_id': ObjectId(user_id)})
             update_data.update({
                 'updatedAt': datetime.utcnow(),
-                'version': current_app.mongo.db.users.find_one(
-                    {'_id': ObjectId(user_id)}
-                )['version'] + 1
+                'version': current_user['version'] + 1
             })
             
             result = current_app.mongo.db.users.update_one(
