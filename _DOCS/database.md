@@ -50,9 +50,9 @@
 | userId       | ObjectId | Required, Indexed        | Reference to Users |
 | description  | String   | Required                 | Task description |
 | isCompleted  | Boolean  | Required, Default: false | Completion status |
-| priority     | Number   | Required, Default: 1     | Priority level (1-5) |
 | status       | String   | Required, Enum, Indexed  | pending/active/completed |
 | isActive     | Boolean  | Required, Default: true  | Soft delete flag |
+| taskType     | String   | Required, Enum          | todo/distraction |
 | createdAt    | DateTime | Required                 | Creation timestamp |
 | updatedAt    | DateTime | Required                 | Last update timestamp |
 | version      | Number   | Required, Default: 1     | Document version |

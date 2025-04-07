@@ -37,6 +37,12 @@ def create_sample_task_tags():
         r'Frontend|Backend|API': ['Project', 'Work'],
     }
     
+    # Add specific rules based on task type
+    task_type_tags = {
+        'todo': ['Work', 'Study'],
+        'distraction': ['Personal']
+    }
+    
     sample_task_tags = []
     task_tag_count = {}  # To keep track of how many tags each task has
     
@@ -49,13 +55,16 @@ def create_sample_task_tags():
             if re.search(pattern, description, re.IGNORECASE):
                 task_tags.update(tag_names)
         
+        # Add tags based on task type
+        if 'taskType' in task:
+            task_type = task['taskType']
+            if task_type in task_type_tags:
+                # Add one random tag from the task type's tag list
+                task_tags.add(random.choice(task_type_tags[task_type]))
+        
         # Always add at least one tag if none were added by rules
         if not task_tags:
             task_tags.add(random.choice(['Work', 'Personal', 'Project']))
-        
-        # Add "Urgent" tag to high priority tasks if not already tagged
-        if task['priority'] >= 4 and 'Urgent' not in task_tags:
-            task_tags.add('Urgent')
         
         # Create task-tag relationships
         for tag_name in task_tags:

@@ -24,8 +24,9 @@ task_model = tasks_ns.model('Task', {
     'title': fields.String(required=True, description='Task title'),
     'description': fields.String(required=False, description='Task description'),
     'status': fields.String(required=False, description='Task status', enum=['pending', 'active', 'completed']),
-    'priority': fields.Integer(required=False, min=1, max=5, default=1, description='Task priority')
-})
+    'task_type': fields.String(required=True, description='Task type', enum=['todo', 'distraction']),
+    }
+)
 
 task_response_model = tasks_ns.inherit('TaskResponse', task_model, {
     '_id': fields.String(description='Task ID'),
@@ -69,8 +70,8 @@ class TaskList(Resource):
         task = {
             'title': data['title'],
             'description': data.get('description', ''),
+            'taskType': data['task_type'],
             'status': data.get('status', 'pending'),
-            'priority': data.get('priority', 1),
             'userId': ObjectId(user_id),
             'isActive': True,
             'createdAt': datetime.utcnow(),
@@ -83,3 +84,41 @@ class TaskList(Resource):
         task['user_id'] = str(task['userId'])
         
         return task, 201
+    
+@tasks_ns.route('/todos')
+class TodoList(Resource):
+    @tasks_ns.doc('list_todos', security='jwt')
+    @tasks_ns.marshal_list_with(task_response_model)
+    def get(self):
+        """List all todo tasks for the current user"""
+        user_id = get_jwt_identity()
+        tasks = list(current_app.mongo.db.tasks.find({
+            'userId': ObjectId(user_id),
+            'isActive': True,
+            'taskType': 'todo'
+        }))
+        
+        for task in tasks:
+            task['_id'] = str(task['_id'])
+            task['user_id'] = str(task['userId'])
+            
+        return tasks
+
+@tasks_ns.route('/distractions')
+class DistractionList(Resource):
+    @tasks_ns.doc('list_distractions', security='jwt')
+    @tasks_ns.marshal_list_with(task_response_model)
+    def get(self):
+        """List all distraction tasks for the current user"""
+        user_id = get_jwt_identity()
+        tasks = list(current_app.mongo.db.tasks.find({
+            'userId': ObjectId(user_id),
+            'isActive': True,
+            'taskType': 'distraction'
+        }))
+        
+        for task in tasks:
+            task['_id'] = str(task['_id'])
+            task['user_id'] = str(task['userId'])
+            
+        return tasks

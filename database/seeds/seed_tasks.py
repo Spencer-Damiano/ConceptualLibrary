@@ -44,6 +44,9 @@ def create_sample_tasks():
     components = ["Login", "Navigation", "Data Processing", "File Upload"]
     systems = ["Production", "Development", "Testing", "Staging"]
     
+    # Task types for our application
+    task_types = ['todo', 'distraction']
+    
     # Create sample tasks
     sample_tasks = []
     
@@ -65,11 +68,14 @@ def create_sample_tasks():
                 system=random.choice(systems)
             )
             
+            # Decide if this is a todo or distraction (80% todo, 20% distraction)
+            task_type = random.choices(task_types, weights=[0.8, 0.2])[0]
+            
             task = {
                 "userId": user['_id'],
                 "description": description,
                 "isCompleted": random.choice([True, False, False, False]),  # 25% completion rate
-                "priority": random.randint(1, 5),
+                "taskType": task_type, 
                 "status": random.choice(['pending', 'active', 'completed']),
                 "isActive": True,
                 "createdAt": datetime.utcnow(),
@@ -97,10 +103,21 @@ def create_sample_tasks():
                     "userId": user['_id'],
                     "isCompleted": True
                 })
+                todo_tasks = db.tasks.count_documents({
+                    "userId": user['_id'],
+                    "taskType": "todo"
+                })
+                distraction_tasks = db.tasks.count_documents({
+                    "userId": user['_id'],
+                    "taskType": "distraction"
+                })
+                
                 print(f"User {user['username']}:")
                 print(f"  Total tasks: {total_tasks}")
                 print(f"  Completed tasks: {completed_tasks}")
                 print(f"  Completion rate: {(completed_tasks/total_tasks*100):.1f}%")
+                print(f"  Todo tasks: {todo_tasks}")
+                print(f"  Distraction tasks: {distraction_tasks}")
         
             return result.inserted_ids
             
