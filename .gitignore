@@ -402,7 +402,7 @@ backend/.venv/
 
 # DEVOPS
 _DEVOPS/SCRIPTS/snapshot/
-# _DEVOPS/SCRIPTS/cmds/
+_DEVOPS/cmds/
 
 # Root
 .env
