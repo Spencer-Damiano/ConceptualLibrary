@@ -3,7 +3,7 @@ from flask import Blueprint, request, current_app
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Create both blueprint and API namespace
 users_bp = Blueprint('users', __name__)
@@ -26,7 +26,7 @@ user_response_model = users_ns.model('UserResponse', {
     'email': fields.String(description='User email'),
     'username': fields.String(description='Username'),
     'name': fields.String(description='User name'),
-    'user_type': fields.String(description='User type', enum=['user', 'admin']),
+    'user_type': fields.String(description='User type (kept for historical purposes)', enum=['user', 'admin']),
     'is_active': fields.Boolean(description='Active status'),
     'created_at': fields.DateTime(description='Creation timestamp'),
     'updated_at': fields.DateTime(description='Last update timestamp'),
@@ -104,7 +104,7 @@ class UserProfile(Resource):
             # Add metadata updates
             current_user = current_app.mongo.db.users.find_one({'_id': ObjectId(user_id)})
             update_data.update({
-                'updatedAt': datetime.utcnow(),
+                'updatedAt': datetime.now(timezone.utc),
                 'version': current_user['version'] + 1
             })
             

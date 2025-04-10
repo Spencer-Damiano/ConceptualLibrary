@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_restx import Namespace, Resource, fields
 
 # Create both blueprint and API namespace
@@ -36,7 +36,7 @@ def register():
     if current_app.mongo.db.users.find_one({'username': data['username']}):
         return jsonify({'message': 'Username already taken'}), 409
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     user = {
         'email': data['email'],
         'password': generate_password_hash(data['password']),
@@ -70,8 +70,8 @@ def login():
         {'_id': user['_id']},
         {
             '$set': {
-                'lastLoginAt': datetime.utcnow(),
-                'updatedAt': datetime.utcnow(),
+                'lastLoginAt': datetime.now(timezone.utc),
+                'updatedAt': datetime.now(timezone.utc),
                 'version': user['version'] + 1
             }
         }

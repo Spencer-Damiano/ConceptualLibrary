@@ -1,5 +1,5 @@
 from pymongo import MongoClient, ASCENDING
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 
@@ -44,8 +44,8 @@ def init_database():
                 'typeName': 'Pomodoro',
                 'description': 'Standard 25/5 minute work/break cycle',
                 'isActive': True,
-                'createdAt': datetime.utcnow(),
-                'updatedAt': datetime.utcnow(),
+                'createdAt': datetime.now(timezone.utc),
+                'updatedAt': datetime.now(timezone.utc),
                 'version': 1
             }
         ]

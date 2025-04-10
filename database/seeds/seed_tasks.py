@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 import random
@@ -78,8 +78,8 @@ def create_sample_tasks():
                 "taskType": task_type, 
                 "status": random.choice(['pending', 'active', 'completed']),
                 "isActive": True,
-                "createdAt": datetime.utcnow(),
-                "updatedAt": datetime.utcnow(),
+                "createdAt": datetime.now(timezone.utc),
+                "updatedAt": datetime.now(timezone.utc),
                 "version": 1
             }
             

@@ -29,7 +29,7 @@ def migrate_tasks():
     for task in tasks_to_update:
         update_data = {
             'taskType': 'todo',  # Default all existing tasks to todo
-            'updatedAt': datetime.utcnow()
+            'updatedAt': datetime.now(timezone.utc)
         }
         
         # Use $unset to remove the priority field

@@ -2,7 +2,7 @@ from flask import Blueprint, request, current_app
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Create both blueprint and API namespace
 sessions_bp = Blueprint('sessions', __name__)
@@ -54,15 +54,25 @@ class SessionList(Resource):
             'isActive': True
         }))
         
+        # Transform each session to match the response model
+        transformed_sessions = []
         for session in sessions:
-            session['_id'] = str(session['_id'])
-            session['user_id'] = str(session['userId'])
-            if 'taskId' in session:
-                session['task_id'] = str(session.pop('taskId'))
-            if 'timerTypeId' in session:
-                session['timer_type_id'] = str(session.pop('timerTypeId'))
+            transformed_sessions.append({
+                '_id': str(session['_id']),
+                'user_id': str(session['userId']),
+                'task_id': str(session['taskId']) if session.get('taskId') else None,
+                'timer_type_id': str(session['timerTypeId']) if session.get('timerTypeId') else None,
+                'status': session.get('status', ''),
+                'start_time': session.get('startTime'),
+                'end_time': session.get('endTime') if 'endTime' in session else None,
+                'work_duration': session.get('workDuration', 0),
+                'break_duration': session.get('breakDuration', 0),
+                'created_at': session.get('createdAt'),
+                'updated_at': session.get('updatedAt'),
+                'version': session.get('version', 1)
+            })
         
-        return sessions
+        return transformed_sessions
 
     @sessions_ns.doc('start_session', security='jwt')
     @sessions_ns.expect(session_model)
@@ -72,29 +82,42 @@ class SessionList(Resource):
         user_id = get_jwt_identity()
         data = request.get_json() or {}
         
+        # Use timezone-aware datetime objects
+        now = datetime.now(timezone.utc)
+        
         session = {
             'userId': ObjectId(user_id),
-            'startTime': datetime.utcnow(),
+            'startTime': now,
             'timerTypeId': ObjectId(data['timer_type_id']),
             'taskId': ObjectId(data['task_id']) if data.get('task_id') else None,
             'workDuration': data['work_duration'],
             'breakDuration': data['break_duration'],
             'status': 'active',
             'isActive': True,
-            'createdAt': datetime.utcnow(),
-            'updatedAt': datetime.utcnow(),
+            'createdAt': now,
+            'updatedAt': now,
             'version': 1
         }
         
         result = current_app.mongo.db.sessions.insert_one(session)
-        session['_id'] = str(result.inserted_id)
-        session['user_id'] = str(session.pop('userId'))
-        if session.get('taskId'):
-            session['task_id'] = str(session.pop('taskId'))
-        if session.get('timerTypeId'):
-            session['timer_type_id'] = str(session.pop('timerTypeId'))
         
-        return session, 201
+        # Create a properly formatted response object with mapped fields
+        response = {
+            '_id': str(result.inserted_id),
+            'user_id': str(session['userId']),
+            'task_id': str(session['taskId']) if session.get('taskId') else None,
+            'timer_type_id': str(session['timerTypeId']) if session.get('timerTypeId') else None,
+            'status': session.get('status', ''),
+            'start_time': session.get('startTime'),
+            'end_time': session.get('endTime') if 'endTime' in session else None,
+            'work_duration': session.get('workDuration', 0),
+            'break_duration': session.get('breakDuration', 0),
+            'created_at': session.get('createdAt'),
+            'updated_at': session.get('updatedAt'),
+            'version': session.get('version', 1)
+        }
+        
+        return response, 201
 
 @sessions_ns.route('/<session_id>/stop')
 @sessions_ns.param('session_id', 'The session identifier')
@@ -103,7 +126,7 @@ class SessionStop(Resource):
     def post(self, session_id):
         """Stop an active session"""
         user_id = get_jwt_identity()
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         
         session = current_app.mongo.db.sessions.find_one({'_id': ObjectId(session_id)})
         if not session:
@@ -122,7 +145,7 @@ class SessionStop(Resource):
                     'endTime': end_time,
                     'status': 'completed',
                     'duration': duration,
-                    'updatedAt': datetime.utcnow(),
+                    'updatedAt': datetime.now(timezone.utc),
                     'version': session['version'] + 1
                 }
             }

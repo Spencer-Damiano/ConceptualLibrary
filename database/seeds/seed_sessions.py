@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
 import random
@@ -31,7 +31,7 @@ def create_sample_sessions():
         # Create 3-5 sessions per user per day for the past 7 days
         for days_ago in range(7):
             num_sessions = random.randint(3, 5)
-            base_date = datetime.utcnow() - timedelta(days=days_ago)
+            base_date = datetime.now(timezone.utc) - timedelta(days=days_ago)
             
             for session_num in range(num_sessions):
                 status = random.choice(statuses)
@@ -48,8 +48,8 @@ def create_sample_sessions():
                     "breakDuration": 5,
                     "status": status,
                     "isActive": True,
-                    "createdAt": datetime.utcnow(),
-                    "updatedAt": datetime.utcnow(),
+                    "createdAt": datetime.now(timezone.utc),
+                    "updatedAt": datetime.now(timezone.utc),
                     "version": 1
                 }
                 

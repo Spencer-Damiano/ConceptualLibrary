@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 import random
@@ -71,7 +71,7 @@ def create_sample_task_tags():
             task_tag = {
                 "taskId": task['_id'],
                 "tagId": tag_dict[tag_name],
-                "createdAt": datetime.utcnow(),
+                "createdAt": datetime.now(timezone.utc),
                 "version": 1
             }
             sample_task_tags.append(task_tag)

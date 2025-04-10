@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
 
@@ -20,64 +20,64 @@ def create_sample_tags():
             "name": "Work",
             "color": "#FF4444",  # Red
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Study",
             "color": "#4444FF",  # Blue
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Personal",
             "color": "#44FF44",  # Green
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Urgent",
             "color": "#FF0000",  # Bright Red
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Important",
             "color": "#FFA500",  # Orange
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Meeting",
             "color": "#800080",  # Purple
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Project",
             "color": "#008080",  # Teal
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         },
         {
             "name": "Research",
             "color": "#FFD700",  # Gold
             "isActive": True,
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "version": 1
         }
     ]

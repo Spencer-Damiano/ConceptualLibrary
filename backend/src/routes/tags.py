@@ -2,7 +2,7 @@ from flask import Blueprint, request, current_app
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Create both blueprint and API namespace
 tags_bp = Blueprint('tags', __name__)
@@ -41,22 +41,6 @@ tag_response_model = tags_ns.inherit('TagResponse', tag_model, {
 
 @tags_ns.route('/')
 class TagList(Resource):
-    @tags_ns.doc('list_tags', security='jwt')
-    @tags_ns.marshal_list_with(tag_response_model)
-    def get(self):
-        """List all tags for the current user"""
-        user_id = get_jwt_identity()
-        tags = list(current_app.mongo.db.tags.find({
-            'userId': ObjectId(user_id),
-            'isActive': True
-        }))
-        
-        for tag in tags:
-            tag['_id'] = str(tag['_id'])
-            tag['user_id'] = str(tag['userId'])
-        
-        return tags
-
     @tags_ns.doc('create_tag', security='jwt')
     @tags_ns.expect(tag_model)
     @tags_ns.marshal_with(tag_response_model, code=201)
@@ -80,21 +64,60 @@ class TagList(Resource):
         if existing_tag:
             tags_ns.abort(409, 'Tag already exists')
         
+        # Use timezone-aware datetime objects
+        now = datetime.now(timezone.utc)
+        
         tag = {
             'name': data['name'],
             'color': data.get('color', '#000000'),
             'userId': ObjectId(user_id),
             'isActive': True,
-            'createdAt': datetime.utcnow(),
-            'updatedAt': datetime.utcnow(),
+            'createdAt': now,
+            'updatedAt': now,
             'version': 1
         }
         
         result = current_app.mongo.db.tags.insert_one(tag)
-        tag['_id'] = str(result.inserted_id)
-        tag['user_id'] = str(tag['userId'])
         
-        return tag, 201
+        # Create a properly formatted response object
+        response = {
+            '_id': str(result.inserted_id),
+            'name': tag['name'],
+            'color': tag['color'],
+            'user_id': str(tag['userId']),
+            'is_active': tag['isActive'],
+            'created_at': tag['createdAt'],
+            'updated_at': tag['updatedAt'],
+            'version': tag['version']
+        }
+        
+        return response, 201
+
+    @tags_ns.doc('list_tags', security='jwt')
+    @tags_ns.marshal_list_with(tag_response_model)
+    def get(self):
+        """List all tags for the current user"""
+        user_id = get_jwt_identity()
+        tags = list(current_app.mongo.db.tags.find({
+            'userId': ObjectId(user_id),
+            'isActive': True
+        }))
+        
+        # Transform each tag to match the response model
+        transformed_tags = []
+        for tag in tags:
+            transformed_tags.append({
+                '_id': str(tag['_id']),
+                'name': tag['name'],
+                'color': tag['color'],
+                'user_id': str(tag['userId']),
+                'is_active': tag['isActive'],
+                'created_at': tag['createdAt'],
+                'updated_at': tag['updatedAt'],
+                'version': tag['version']
+            })
+        
+        return transformed_tags
 
 @tags_ns.route('/<tag_id>')
 @tags_ns.param('tag_id', 'The tag identifier')
@@ -116,7 +139,8 @@ class Tag(Resource):
             {
                 '$set': {
                     'isActive': False,
-                    'updatedAt': datetime.utcnow()
+                    'updatedAt': datetime.now(timezone.utc),  # Use timezone-aware datetime
+                    'updatedBy': ObjectId(user_id)  # Add updatedBy field
                 }
             }
         )

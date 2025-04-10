@@ -1,8 +1,8 @@
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def create_sample_users():
     load_dotenv()
@@ -19,34 +19,34 @@ def create_sample_users():
     sample_users = [
         {
             "username": "admin_user",
-            "passwordHash": bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt()),
+            "password": generate_password_hash("admin123"),
             "userType": "admin",
             "isActive": True,
             "email": "admin@example.com",
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "lastLoginAt": None,
             "version": 1
         },
         {
             "username": "test_user1",
-            "passwordHash": bcrypt.hashpw("test123".encode('utf-8'), bcrypt.gensalt()),
+            "password": generate_password_hash("test123"),
             "userType": "user",
             "isActive": True,
             "email": "user1@example.com",
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "lastLoginAt": None,
             "version": 1
         },
         {
             "username": "test_user2",
-            "passwordHash": bcrypt.hashpw("test456".encode('utf-8'), bcrypt.gensalt()),
+            "password": generate_password_hash("test456"),
             "userType": "user",
             "isActive": True,
             "email": "user2@example.com",
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
+            "createdAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(timezone.utc),
             "lastLoginAt": None,
             "version": 1
         }
